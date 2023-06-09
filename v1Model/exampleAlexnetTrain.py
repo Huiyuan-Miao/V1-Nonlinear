@@ -1,3 +1,6 @@
+'''
+Those the file title says alexnet, it is actually design to take care of any model with pre-saved feature map from processFeatureMap.py
+'''
 # % pylab inline
 import os
 import sys
