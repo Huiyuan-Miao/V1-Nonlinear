@@ -13,7 +13,7 @@ from PIL import Image
 from vgg import *
 # import tensorflow as tf
 
-DATA_PATH = '../Cadena_VGG-19/Cadena_PlosCB19_data/data_binned_responses/' # downloaded from Cadena et al. (2019) github page
+DATA_PATH = '../Cadena_VGG-19/Cadena_PlosCB19_data/data_binned_responses/' # downloaded from Cadena et al. (2019) github page https://github.com/sacadena/Cadena2019PlosCB
 FILE = 'cadena_ploscb_data.pkl'
 file_path = DATA_PATH + FILE
 with open(file_path, 'rb') as g:
