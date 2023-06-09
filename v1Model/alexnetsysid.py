@@ -1,6 +1,5 @@
 '''
-adapted from Cadena et al. 2019 codes
-the goal is to make the training process as similar as possible to vgg model in Cadena et al. 2019
+adapted from Cadena et al. 2019 codes https://github.com/sacadena/Cadena2019PlosCB
 '''
 
 import numpy as np
