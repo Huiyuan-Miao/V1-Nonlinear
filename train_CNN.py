@@ -274,5 +274,5 @@ if __name__ == '__main__':
                 stat_file.write(stat_str + '\n')
                 stat_file.close()
             FLAGS.epochs = 180
-            model = AlexNet_v1_color(num_classes=FLAGS.num_classes, init_weights=init_weights)
+            model = AlexNet_modified_color(num_classes=FLAGS.num_classes, init_weights=init_weights)
             main(model)
