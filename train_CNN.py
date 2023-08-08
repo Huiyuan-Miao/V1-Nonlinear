@@ -31,17 +31,8 @@ from alexnet import *
 parser = argparse.ArgumentParser(description='ImageNet Training')
 parser.add_argument('--data_path', default = '/home/tonglab/Datasets/imagenet1000',
                     help='path to ImageNet folder that contains train and val folders')
-parser.add_argument('-o', '--output_path', default='/home/tonglab/Miao/pycharm/vgg13SurroundSuppression/vgg13',
+parser.add_argument('-o', '--output_path', default='/home/tonglab/Miao/pycharm/',
                     help='path for storing ')
-parser.add_argument('--model', choices=['Z', 'R', 'RT', 'S','RTLARGELATERAL','RTREDUCEITACT','RTSFLOWTOHIGH',
-                                        'RTSFHIGHTOCLEAR','RTSFLOW','RTSFHIGH','RTSFHITOCLEAR'], default='RTSFHIGHTOCLEAR',
-                    help='which model to train')
-parser.add_argument('--times', default=5, type=int,
-                    help='number of time steps to run the model (only R model)')
-parser.add_argument('--ngpus', default=1, type=int,
-                    help='number of GPUs to use; 0 if you want to run on CPU')
-parser.add_argument('-j', '--workers', default=20, type=int,
-                    help='number of data loading workers')
 parser.add_argument('--epochs', default=25, type=int,
                     help='number of total epochs to run')
 parser.add_argument('--batch_size', default=128, type=int,
@@ -269,10 +260,6 @@ if __name__ == '__main__':
             else:
                 init_weights = True
                 os.makedirs(FLAGS.output_path, exist_ok=True)
-                stat_file = open(os.path.join(FLAGS.output_path, 'augmentation.txt'), 'a+')
-                stat_str = 'random size crop 224, random rotation -10~10 degree, random horizontal flip'
-                stat_file.write(stat_str + '\n')
-                stat_file.close()
             FLAGS.epochs = 180
             model = AlexNet_modified_color(num_classes=FLAGS.num_classes, init_weights=init_weights)
             main(model)
