@@ -4,7 +4,7 @@ import numpy as np
 
 class AlexNet_modified_color(nn.Module):
 
-    def __init__(self, num_classes=1000):
+    def __init__(self, num_classes=1000,init_weights = False):
         super(AlexNet_modified_color, self).__init__()
         self.features = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=11, stride=3, padding=5),
@@ -34,6 +34,15 @@ class AlexNet_modified_color(nn.Module):
             nn.ReLU(inplace=True),
             nn.Linear(4096, num_classes),
         )
+        if init_weights:
+            for m in self.modules():
+                if isinstance(m, nn.Conv2d):
+                    nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                    if m.bias is not None:
+                        nn.init.constant_(m.bias, 0)
+                elif isinstance(m, nn.Linear):
+                    nn.init.normal_(m.weight, 0, 0.01)
+                    nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
         x = self.features(x)
