@@ -27,12 +27,12 @@ class vgg19(nn.Module):
         self.l54 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
         self.avgpool = nn.AdaptiveAvgPool2d((7,7))
         self.classifier = nn.Sequential(
-            nn.Dropout(),
             nn.Linear(512*7*7, 4096),
             nn.ReLU(inplace=True),
             nn.Dropout(p = dropout),
             nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
+            nn.Dropout(p = dropout),
             nn.Linear(4096, num_classes),
         )
         if init_weights:
@@ -187,15 +187,14 @@ class vgg19_modified2(nn.Module):
         self.l52 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
         self.l53 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
         self.l54 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
-        self.avgpool = nn.AdaptiveAvgPool2d((1,1))
+        self.avgpool = nn.AdaptiveAvgPool2d((7,7))
         self.classifier = nn.Sequential(
-            #nn.Dropout(),
-            nn.Linear(512*1*1, 4096),
+            nn.Linear(512*7*7, 4096),
             nn.ReLU(inplace=True),
             nn.Dropout(p = dropout),
             nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=dropout),
+            nn.Dropout(p = dropout),
             nn.Linear(4096, num_classes),
         )
         if init_weights:
@@ -323,15 +322,14 @@ class vgg19_modified3(nn.Module):
         self.l52 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
         self.l53 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
         self.l54 = nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1)
-        self.avgpool = nn.AdaptiveAvgPool2d((2,2))
+        self.avgpool = nn.AdaptiveAvgPool2d((7,7))
         self.classifier = nn.Sequential(
-            #nn.Dropout(),
-            nn.Linear(512*2*2, 4096),
+            nn.Linear(512*7*7, 4096),
             nn.ReLU(inplace=True),
             nn.Dropout(p = dropout),
             nn.Linear(4096, 4096),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=dropout),
+            nn.Dropout(p = dropout),
             nn.Linear(4096, num_classes),
         )
         if init_weights:
