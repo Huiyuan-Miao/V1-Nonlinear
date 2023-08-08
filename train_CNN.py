@@ -8,7 +8,7 @@ import random
 import time
 import numpy
 import scipy.io
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import collections
 
 import torch
@@ -24,33 +24,55 @@ import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
-
+import os, argparse, glob, pickle, subprocess, shlex, io, pprint
 from cadena_utils import *
 from alexnet import *
-from vgg import *
 
-def main():
+parser = argparse.ArgumentParser(description='ImageNet Training')
+parser.add_argument('--data_path', default = '/home/tonglab/Datasets/imagenet1000',
+                    help='path to ImageNet folder that contains train and val folders')
+parser.add_argument('-o', '--output_path', default='/home/tonglab/Miao/pycharm/vgg13SurroundSuppression/vgg13',
+                    help='path for storing ')
+parser.add_argument('--model', choices=['Z', 'R', 'RT', 'S','RTLARGELATERAL','RTREDUCEITACT','RTSFLOWTOHIGH',
+                                        'RTSFHIGHTOCLEAR','RTSFLOW','RTSFHIGH','RTSFHITOCLEAR'], default='RTSFHIGHTOCLEAR',
+                    help='which model to train')
+parser.add_argument('--times', default=5, type=int,
+                    help='number of time steps to run the model (only R model)')
+parser.add_argument('--ngpus', default=1, type=int,
+                    help='number of GPUs to use; 0 if you want to run on CPU')
+parser.add_argument('-j', '--workers', default=20, type=int,
+                    help='number of data loading workers')
+parser.add_argument('--epochs', default=25, type=int,
+                    help='number of total epochs to run')
+parser.add_argument('--batch_size', default=128, type=int,
+                    help='mini-batch size')
+parser.add_argument('--lr', '--learning_rate', default=.01, type=float,
+                    help='initial learning rate')
+parser.add_argument('--step_size', default=60, type=int,
+                    help='after how many epochs learning rate should be decreased 10x')
+parser.add_argument('--momentum', default=.9, type=float, help='momentum')
+parser.add_argument('--weight_decay', default=1e-4, type=float,
+                    help='weight decay ')
+FLAGS, FIRE_FLAGS = parser.parse_known_args()
+
+def main(model):
 
     #### Parameters ####################################################################################################
-    model_path = '/home/tonglab/Miao/pycharm/Cadena_VGG-19/AlexNet_modified_color'
+    model_path = FLAGS.output_path
 
-    train_batch_size = 128
-    val_batch_size = 128
+    train_batch_size = FLAGS.batch_size
+    val_batch_size = 32
     start_epoch = 0
-    num_epochs = 100
-    save_every_epoch = 20
-    initial_learning_rate = 1e-2
-    gpu_ids = [0,1]
+    num_epochs = FLAGS.epochs
+    save_every_epoch = 60
+    initial_learning_rate = FLAGS.lr
+    gpu_ids = [1]
 
     #### Create/Load model #############################################################################################
     # 1. If pre-trained models used without pre-trained weights. e.g., model = models.vgg19()
     # 2. If pre-trained models used with pre-trained weights. e.g., model = models.vgg19(pretrained=True)
     # 3. If our models used.
     ####################################################################################################################
-
-    # model = models.alexnet(pretrained=False)
-    # model = AlexNet()
-    model = AlexNet_modified_color()
 
     if len(gpu_ids) > 1:
         # model = torch.nn.DataParallel(model, device_ids=gpu_ids, output_device=gpu_ids[0]).cuda()
@@ -62,7 +84,7 @@ def main():
         model.to(device)
 
     loss_function = nn.CrossEntropyLoss().cuda()
-    optimizer = optim.SGD(model.parameters(), lr=initial_learning_rate, weight_decay=1e-4)
+    optimizer = optim.SGD(model.parameters(), lr=initial_learning_rate, weight_decay=FLAGS.weight_decay)
     # optimizer = optim.Adam(model.parameters(), lr=initial_learning_rate, weight_decay=1e-4)
 
     #### Resume from checkpoint
@@ -103,20 +125,16 @@ def main():
 
 
     #### Learning rate scheduler
-    lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[61], gamma=0.1, last_epoch=start_epoch-1)
-    lr_scheduler.step()
-
-    #### Data loader ###################################################################################################
-    # 0, n01622779, Owl; 1, n02123045, Cat; 2, n02129165, Lion; 3, n02132136, Bear; 4, n02326432, Hare;
-    # 5, n02342885, Hamster; 6, n02410509, Bison; 7, n02504458, Elephant; 8, n02690373, Airliner;
-    # 9, n03594945, Jeep; 10, n04147183, Schooner; 11, n04273569, Speedboat; 12, n04285008, Sports car;
-    # 13, n04344873, Couch; 14, n04380533, Table lamp, 15, n04398044, Teapot
-    ####################################################################################################################
+    lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size=FLAGS.step_size,last_epoch=start_epoch-1)
 
     train_dataset = torchvision.datasets.ImageFolder(
-        "/home/tonglab/Datasets/imagenet1000/train",
+        # "/home/tonglab/Documents/Data/ILSVRC2012/images/train_16",
+        FLAGS.data_path+"/train",
         transforms.Compose([
+            # transforms.Resize(256),
+            # transforms.RandomCrop(224),
             transforms.RandomResizedCrop(224),
+            transforms.RandomRotation(10),
             transforms.RandomHorizontalFlip(),
             # transforms.Grayscale(),
             transforms.ToTensor(),
@@ -128,9 +146,10 @@ def main():
     # val_dataset = torchvision.datasets.ImageFolder(
     val_dataset = ImageFolderWithPaths(
         # "/home/tonglab/Documents/Data/ILSVRC2012/images/val_16",
-        "/home/tonglab/Datasets/imagenet1000/val",
+         FLAGS.data_path+"/val",
         transforms.Compose([
-            transforms.Resize((224,224)),
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
             # transforms.Grayscale(),
             transforms.ToTensor(),
             # transforms.Normalize(mean=[0.449], std=[0.226])
@@ -141,13 +160,15 @@ def main():
     #### Train/Val #####################################################################################################
     for epoch in range(start_epoch,num_epochs):
 
+        if epoch < start_epoch+num_epochs-1:
+            # lr_scheduler.step()
+            lr.step(epoch=epoch)
         print("... Start epoch at '{}'".format(epoch))
         stat_file = open(os.path.join(model_path, 'training_stats.txt'), 'a+')
         train(train_loader, model, loss_function, optimizer, epoch, stat_file, gpu_ids)
         val(val_loader, model, loss_function, optimizer, epoch, stat_file, gpu_ids)
 
-        if epoch < start_epoch+num_epochs-1:
-            lr_scheduler.step()
+
 
         torch.save({'epoch': epoch, 'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}, os.path.join(model_path, 'checkpoint.pth.tar'))
         if numpy.mod(epoch, save_every_epoch) == save_every_epoch-1:
@@ -234,4 +255,24 @@ def is_correct(output, target, topk=1):
         return correct, num_correct
 
 if __name__ == '__main__':
-    main()
+    for whichModel in [0]:
+        if whichModel == 0:
+            FLAGS.num_classes = 1000
+            FLAGS.batch_size = 256
+            FLAGS.weight_decay = 1e-4
+            FLAGS.step_size = 60
+            FLAGS.data_path = '/home/tonglab/Datasets/imagenet' + str(FLAGS.num_classes)
+            FLAGS.output_path = '/home/tonglab/Miao/pycharm/CadenaData_V1/AlexNet_v1_color_' + str(
+                FLAGS.num_classes) + 'cate_batchSize' + str(FLAGS.batch_size) + '_wtDecay' + str(FLAGS.weight_decay) +'_stepSize' + str(FLAGS.step_size)
+            if os.path.isfile(os.path.join(FLAGS.output_path, 'checkpoint.pth.tar')):
+                init_weights = False
+            else:
+                init_weights = True
+                os.makedirs(FLAGS.output_path, exist_ok=True)
+                stat_file = open(os.path.join(FLAGS.output_path, 'augmentation.txt'), 'a+')
+                stat_str = 'random size crop 224, random rotation -10~10 degree, random horizontal flip'
+                stat_file.write(stat_str + '\n')
+                stat_file.close()
+            FLAGS.epochs = 180
+            model = AlexNet_v1_color(num_classes=FLAGS.num_classes, init_weights=init_weights)
+            main(model)
