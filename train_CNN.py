@@ -1,5 +1,5 @@
 ''' Summary
-To train AlexNet to fit Cadena's nerual data.
+This script can be generalized to do any CNN training for object recognition tasks. 
 '''
 
 import os
