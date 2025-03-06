@@ -1,3 +1,12 @@
+% Huiyuan Miao @ 2024
+% this file is used for creating Gabor wavelet with 4 different phases for feature extraction. 
+% iw - image width for your images to be processed. This is defined as your field of view (FOV) and the Gabors are defined relative to this. 
+% F0s - the frequencys of your Gabors in a unit of x cycle/FOV
+% thetas - the orientation of the Gabors
+% freqBW - frequency bandwidth of the Gabors
+
+% the output of this function is a group of Gabors with fixed location. If you don't want this restriction, you can use the output of GaborWaveletSimple at the bottom of the page. 
+
 function GW = GaborWavelet_4phase_dense(iw,F0s,thetas,freqBW)
 % originally the 2 c/fov have 2 * 2 gabors, now it would have 4 * 4, etc
 GW = cell(length(F0s),4);
@@ -17,6 +26,7 @@ for i = 1 : length(F0s)
         bg3 = gabor3;
         bg4 = gabor4;
         count = 0;
+        # put Gabors at different locations of the FOV
         for k = 1 : F0s(i)*2
             l = (k - 1) * gridWidth;
             r = (F0s(i)*2 - k) * gridWidth;
@@ -42,6 +52,7 @@ for i = 1 : length(F0s)
 end
 end
 %%
+% The GaborWaveletSimple function will give a Gabors without spatial restrictions. 
 function [gabor1,gabor2,gabor3,gabor4] = GaborWaveletSimple(iw,F0,theta,freqBW)
 lambda = 1/F0;
 sd = 1/pi * sqrt(log(2)/2)*(2^freqBW+1)/(2^freqBW-1) * lambda;
