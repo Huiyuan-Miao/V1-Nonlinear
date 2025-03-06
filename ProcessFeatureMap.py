@@ -1,3 +1,4 @@
+# an example script for saving features from DNN models in a format that can be passed to the V1 model training script. Can change to any model, but remember to also modify the layer name you would like to save. 
 import os
 import inspect
 import torch
