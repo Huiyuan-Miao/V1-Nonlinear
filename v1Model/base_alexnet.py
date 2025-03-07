@@ -9,6 +9,8 @@ Thus this script is modified from the Cadena et al. 2019 script "base.py" from h
 
 -230606
 This file can also be used for the modified VGG-19...or any model with pre-saved featuremap from the ProcessFeatureMap
+
+Huiyuan Miao
 '''
 
 import numpy as np
