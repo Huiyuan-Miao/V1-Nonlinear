@@ -1,11 +1,6 @@
 '''
-Data manager script with helper classes for neural system identification
-
-Author: Santiago Cadena
-Last update: April 2019
-
-This file is from https://github.com/sacadena/Cadena2019PlosCB. Included here for completeness
-The V1 model training codes are adapted from the code Cadena et al. (2019) with small modifications
+This file is used for loading the neural and image data from Cadena et al. 2019
+The code is from https://github.com/sacadena/Cadena2019PlosCB, provided by the author of Cadena et al. 2019
 '''
 
 import pickle
