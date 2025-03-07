@@ -249,7 +249,8 @@ RF_SIZES['conv5/conv5_4'] = 252
 RF_SIZES['pool5'] = 268
 
 
-#################### Gabor filter bank generation ##########################
+#################### Gabor filter bank generation ########################## 
+## Miao & Tong 2024 created and tested a bigger Gabor Wavelet pyramid, this gabor filter bank is not used in the paper 
 
 class GaborSet:
     def __init__(self,
