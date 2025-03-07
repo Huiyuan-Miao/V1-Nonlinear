@@ -2,7 +2,13 @@ clear all
 close all
 figureID = 1;
 warning('off','all')
+% this is for saving out Gabor model with output further processed by exponentiation to simulate contrast compression effect
+% Two types of cells are simulated in this file. The simple cell and the complex cell. The Gabor output represents the simple cell, and combination of the quadrature pair Gabors represents the complex cell
+
+%%%%%%%%%%%%%%%% this part is the same as the base model saveOutGaborAct_4phase_simComp_denseGabor.m
 %% load image and stimuli
+% save two types of filters - one is filter output normalized by the max possible output of a filter, another is filter output not normalized. 
+% the normalization is proposed because the filter output can be different because of the filter size. 
 filterRsps = {'divMaxFiltRsp','noDivMaxFiltRsp'};
 for fR = 1 : length(filterRsps)   
     type = {};
@@ -63,7 +69,7 @@ for fR = 1 : length(filterRsps)
                     end
                 end
             end
-            %% max simple
+            %% calculate max possible filter output
             BestImg = GWReshape;
             
             BestImg(BestImg>0) = 3;
@@ -82,11 +88,7 @@ for fR = 1 : length(filterRsps)
                         resp_Complex_Max = (resp_Max_(:,1) + resp_Max_(:,2))/2;
             resp_Max = [resp_Complex_Max;resp1_Max;resp2_Max;resp3_Max;resp4_Max];
             resp_Max(resp_Max==0) = 1;
-            %% image preprocessing
-            stimTrn_pro = zeros(size(stimTrn,1),iw^2);
-            for i = 1 : size(stimTrn,1)
-                stimTrn_pro(i,:) = reshape(squeeze(stimTrn(i,:,:)),[],iw^2);
-            end
+
             %% Put img through filter
             % image preprocessing
             stimTrn_pro = zeros(size(stimTrn,1),iw^2);
@@ -121,6 +123,7 @@ for fR = 1 : length(filterRsps)
             resp3_ = resp3;resp3_(resp3_<0) = 0;
             resp4_ = resp4;resp4_(resp4_<0) = 0;
             resps_con_Val= [complex_Val;resp1_;resp2_;resp3_;resp4_];
+            % normalize the filter output by its max possible output
             if fR == 1 
                 resps_con = resps_con./resp_Max;
                 resps_con_Val = resps_con_Val./resp_Max;
@@ -130,8 +133,12 @@ for fR = 1 : length(filterRsps)
             b = [stimTrnID;stimValID];
             [x,y] = sort(b);
             c = a(:,y);
+            % save base model
             h5create([saveDir,'/layer0Processed.h5'],'/featuremap',[size(c,1),7250])
             h5write([saveDir,'/layer0Processed.h5'],'/featuremap',c)
+%%%%%%%%%%%%%%% the above part is the same as the base model saveOutGaborAct_4phase_simComp_denseGabor.m
+
+            % apply compession to the Gabor output value
             for compression = [0.1:0.1:1]
                 d_sign = sign(c);
                 d = abs(c).^compression.*d_sign;
