@@ -1,3 +1,13 @@
+% this file is aimed at applying non-linear operations (divisive normalization) to the output of Gabor filter bank. 
+% It can achieve 2 different types of divisive normalizaton across the sapce (surround suppression)
+% 1) Gabor filter only normalized by weighted sum of nearby Gabors with the same orientation preference - acrossOri = 0
+% 2) Gabor filters normalized by weighted sum of nearby Gabors from all possible orientation equally - acrossOri = 1
+% please refer to Miao & Tong 2024 for detailed parameter setting.
+% GWlab - is created when Gabor filters were generated - marked the Gabor features like orientation, spatial frequency etc.
+% F0s is the Gabor's SF, you can choose which set of Gabor you would like to normalize. this parameter and adjSDParam collaboratively decide the impact from the neighboring parametersei
+% thetas is the Gabor's orientation, you can choos which set of Gabor you would like to normalize
+% denominator is the normalization pool
+
 function [outputs] = divNormSpatial_adjSD_denseGabor(inputs,GWlab,F0s,thetas,iw,r,acrossOri,adjSDParam,denominator)
 % sd has a unit of pixel
 outputs = inputs;
