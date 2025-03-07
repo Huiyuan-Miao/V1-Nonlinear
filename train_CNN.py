@@ -50,7 +50,6 @@ def main(model):
 
     #### Parameters ####################################################################################################
     model_path = FLAGS.output_path
-
     train_batch_size = FLAGS.batch_size
     val_batch_size = 32
     start_epoch = 0
@@ -76,7 +75,6 @@ def main(model):
 
     loss_function = nn.CrossEntropyLoss().cuda()
     optimizer = optim.SGD(model.parameters(), lr=initial_learning_rate, weight_decay=FLAGS.weight_decay)
-    # optimizer = optim.Adam(model.parameters(), lr=initial_learning_rate, weight_decay=1e-4)
 
     #### Resume from checkpoint
     try:
@@ -117,7 +115,8 @@ def main(model):
 
     #### Learning rate scheduler
     lr = torch.optim.lr_scheduler.StepLR(optimizer, step_size=FLAGS.step_size,last_epoch=start_epoch-1)
-
+  
+    ##### train val dataset - usually only need to change the augmentation method
     train_dataset = torchvision.datasets.ImageFolder(
         # "/home/tonglab/Documents/Data/ILSVRC2012/images/train_16",
         FLAGS.data_path+"/train",
@@ -150,7 +149,6 @@ def main(model):
 
     #### Train/Val #####################################################################################################
     for epoch in range(start_epoch,num_epochs):
-
         if epoch < start_epoch+num_epochs-1:
             # lr_scheduler.step()
             lr.step(epoch=epoch)
@@ -158,8 +156,6 @@ def main(model):
         stat_file = open(os.path.join(model_path, 'training_stats.txt'), 'a+')
         train(train_loader, model, loss_function, optimizer, epoch, stat_file, gpu_ids)
         val(val_loader, model, loss_function, optimizer, epoch, stat_file, gpu_ids)
-
-
 
         torch.save({'epoch': epoch, 'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}, os.path.join(model_path, 'checkpoint.pth.tar'))
         if numpy.mod(epoch, save_every_epoch) == save_every_epoch-1:
