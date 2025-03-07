@@ -1,3 +1,7 @@
+# this is the modified AlexNet in the Miao & Tong 2024
+# additional function added for feature extraction of the conv and maxpool layers
+# Huiyuan Miao @ 2024
+
 import torch
 import torch.nn as nn
 import numpy as np
