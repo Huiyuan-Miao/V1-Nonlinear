@@ -2,7 +2,6 @@ clear all
 close all
 figureID = 1;
 warning('off','all')
-% this if for saving out base model
 %% load image and stimuli
 filterRsps = {'divMaxFiltRsp','noDivMaxFiltRsp'};
 for fR = 1 : length(filterRsps)   
@@ -18,7 +17,7 @@ for fR = 1 : length(filterRsps)
         % steps.
         end        
         
-        %%
+        %% build Gabors 
         for ori = [8]%[4,8,12,16]
             saveDir = ['./GaborActivationCompression4Phase_simpleComplex_',num2str(ori),'ori_',num2str(iw),'px_denseGabor/',filterRsps{fR}];
             if ~exist(saveDir)
@@ -42,7 +41,7 @@ for fR = 1 : length(filterRsps)
             GWReshape = zeros(numFilter,iw^2,4);
             GWlab = zeros(numFilter,4);
             count = 0;
-            ctrImg = iw/2 + 0.5;
+            #ctrImg = iw/2 + 0.5;
             whoIsZero = [];
             for i = 1 : length(F0s)
                 for k = 1 : (F0s(i)*2)^2
