@@ -6,6 +6,8 @@
 % GWlab - is created when Gabor filters were generated - marked the Gabor features like orientation, spatial frequency etc.
 % F0s is the Gabor's SF, you can choose which set of Gabor you would like to normalize. this parameter and adjSDParam collaboratively decide the impact from the neighboring parametersei
 % thetas is the Gabor's orientation, you can choos which set of Gabor you would like to normalize
+% iw is the input image size
+% r controls the strength of normalization, larger r smaller normalization
 % denominator is the normalization pool
 
 function [outputs] = divNormSpatial_adjSD_denseGabor(inputs,GWlab,F0s,thetas,iw,r,acrossOri,adjSDParam,denominator)
