@@ -1,6 +1,6 @@
 ''' Summary
 This script can be generalized to do any CNN training for object recognition tasks. 
-Huiyuan Miao @ 2024
+Huiyuan Miao @ 2023
 '''
 
 import os
