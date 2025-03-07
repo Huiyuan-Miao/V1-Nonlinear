@@ -2,8 +2,14 @@ clear all
 close all
 figureID = 1;
 warning('off','all')
-% this if for saving out base model
+
+% this is for saving out Gabor model with output further processed by exponentiation to simulate spatial limited surround suppression
+% Two types of cells are simulated in this file. The simple cell and the complex cell. The Gabor output represents the simple cell, and combination of the quadrature pair Gabors represents the complex cell
+
+%%%%%%%%%%%%%%%% this part is the same as the base model saveOutGaborAct_4phase_simComp_denseGabor.m
 %% load image and stimuli
+% save two types of filters - one is filter output normalized by the max possible output of a filter, another is filter output not normalized. 
+% the normalization is proposed because the filter output can be different because of the filter size. 
 filterRsps = {'divMaxFiltRsp','noDivMaxFiltRsp'};
 for fR = 1: length(filterRsps)
     type = {};
@@ -64,7 +70,8 @@ for fR = 1: length(filterRsps)
                     end
                 end
             end
-            %% max simple
+            %% calculate the max possible filter output
+            
             BestImg = GWReshape;
             BestImg(BestImg>0) = 3;
             BestImg(BestImg<0) = -3;
@@ -81,11 +88,7 @@ for fR = 1: length(filterRsps)
             resp_Complex_Max = (resp_Max_(:,1) + resp_Max_(:,2))/2;
             resp_Max = [resp_Complex_Max;resp1_Max;resp2_Max;resp3_Max;resp4_Max];
             resp_Max(resp_Max==0) = 1;
-            %% image preprocessing
-            stimTrn_pro = zeros(size(stimTrn,1),iw^2);
-            for i = 1 : size(stimTrn,1)
-                stimTrn_pro(i,:) = reshape(squeeze(stimTrn(i,:,:)),[],iw^2);
-            end
+
             %% Put img through filter
             % image preprocessing
             stimTrn_pro = zeros(size(stimTrn,1),iw^2);
@@ -132,31 +135,33 @@ for fR = 1: length(filterRsps)
             c = a(:,y);
             h5create([saveDir,'/layer0Processed.h5'],'/featuremap',[size(c,1),7250])
             h5write([saveDir,'/layer0Processed.h5'],'/featuremap',c)
+%%%%%%%%%%%%%%% the above part is the same as the base model saveOutGaborAct_4phase_simComp_denseGabor.m
+% apply divisive normalization 
             for r = [0.01,0.05,0.1,0.25,0.5,0.75,1,1.5,2] %[0.01:0.01:2]
                 c1 = c(1:size(c,1)/5,:);
                 c2 = c(size(c,1)/5+1 :size(c,1)/5*2,:);
                 c3 = c(size(c,1)/5*2+1 :size(c,1)/5*3,:);
                 c4 = c(size(c,1)/5*3+1 :size(c,1)/5*4,:);
                 c5 = c(size(c,1)/5*4+1:end,:);
-                c_s = (c2 + c3 + c4 + c5)/4;
+                c_s = (c2 + c3 + c4 + c5)/4; % average across 4 phase
                 d1 = zeros(size(c1));
                 d2 = zeros(size(c2));
                 d3 = zeros(size(c3));
                 d4 = zeros(size(c4));
                 d5 = zeros(size(c5));
                 for dN = 1 : size(c1,1)/length(thetas)
-                    if sum(mean(c_s(ori*(dN-1)+1 : ori*dN,:),1)) ~= 0
+                    if sum(mean(c_s(ori*(dN-1)+1 : ori*dN,:),1)) ~= 0 % simple cell normalization
                         d2(ori*(dN-1)+1 : ori*dN,:) = c2(ori*(dN-1)+1 : ori*dN,:)./(r+mean(c_s(ori*(dN-1)+1 : ori*dN,:),1));
                         d3(ori*(dN-1)+1 : ori*dN,:) = c3(ori*(dN-1)+1 : ori*dN,:)./(r+mean(c_s(ori*(dN-1)+1 : ori*dN,:),1));
                         d4(ori*(dN-1)+1 : ori*dN,:) = c4(ori*(dN-1)+1 : ori*dN,:)./(r+mean(c_s(ori*(dN-1)+1 : ori*dN,:),1));
                         d5(ori*(dN-1)+1 : ori*dN,:) = c5(ori*(dN-1)+1 : ori*dN,:)./(r+mean(c_s(ori*(dN-1)+1 : ori*dN,:),1));
-                    else
+                    else 
                         d2(ori*(dN-1)+1 : ori*dN,:) = 0;
                         d3(ori*(dN-1)+1 : ori*dN,:) = 0;
                         d4(ori*(dN-1)+1 : ori*dN,:) = 0;
                         d5(ori*(dN-1)+1 : ori*dN,:) = 0;
                     end
-                    if sum(mean(c1(ori*(dN-1)+1 : ori*dN,:),1)) ~= 0
+                    if sum(mean(c1(ori*(dN-1)+1 : ori*dN,:),1)) ~= 0 % complex cell normalization
                         d1(ori*(dN-1)+1 : ori*dN,:) = c1(ori*(dN-1)+1 : ori*dN,:)./(r+mean(c1(ori*(dN-1)+1 : ori*dN,:),1));
                     else
                         d1(ori*(dN-1)+1 : ori*dN,:) = 0;
@@ -170,19 +175,11 @@ for fR = 1: length(filterRsps)
                 type{count2} = [r];
             end
             type{count2+1} = ['r'];
+            % make a note of the parameter tested 
             save('normType_DivNormCrossOriSupp.mat','type')
         end
     end
 end
 
-%%
-% 'GaborActivationBase4Phase_simple_4ori_20px/divMaxFiltRsp','GaborActivationBase4Phase_simple_4ori_20px/noDivMaxFiltRsp',
-% 'GaborActivationBase4Phase_simple_4ori_40px/divMaxFiltRsp','GaborActivationBase4Phase_simple_4ori_40px/noDivMaxFiltRsp',
-% 'GaborActivationBase4Phase_simpleComplex_4ori_20px/divMaxFiltRsp','GaborActivationBase4Phase_simpleComplex_4ori_20px/noDivMaxFiltRsp',
-% 'GaborActivationBase4Phase_simpleComplex_4ori_40px/divMaxFiltRsp','GaborActivationBase4Phase_simpleComplex_4ori_40px/noDivMaxFiltRsp',
-% 'GaborActivationBase4Phase_simple_8ori_20px/divMaxFiltRsp','GaborActivationBase4Phase_simple_8ori_20px/noDivMaxFiltRsp',
-% 'GaborActivationBase4Phase_simple_8ori_40px/divMaxFiltRsp','GaborActivationBase4Phase_simple_8ori_40px/noDivMaxFiltRsp',
-% 'GaborActivationBase4Phase_simpleComplex_8ori_20px/divMaxFiltRsp','GaborActivationBase4Phase_simpleComplex_8ori_20px/noDivMaxFiltRsp',
-% 'GaborActivationBase4Phase_simpleComplex_8ori_40px/divMaxFiltRsp','GaborActivationBase4Phase_simpleComplex_8ori_40px/noDivMaxFiltRsp',
 
 
