@@ -1,6 +1,7 @@
 '''
 adapted from Cadena et al. 2019 codes https://github.com/sacadena/Cadena2019PlosCB
 Those the file title says alexnet, it is actually design to take care of any model with pre-saved feature map from processFeatureMap.py
+Huiyuan Miao @ 2024
 '''
 
 import numpy as np
