@@ -1,4 +1,4 @@
-# Huiyuan Miao @ 2024
+# Huiyuan Miao @ 2023
 # this file provides different modified VGG19 models used in the paper Miao & Tong (2024). The function has been modified for feature extraction
 import torch
 import torch.nn as nn
