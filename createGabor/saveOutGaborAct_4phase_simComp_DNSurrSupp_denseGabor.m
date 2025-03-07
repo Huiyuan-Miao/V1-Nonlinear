@@ -6,6 +6,8 @@ warning('off','all')
 % Two types of cells are simulated in this file. The simple cell and the complex cell. The Gabor output represents the simple cell, and combination of the quadrature pair Gabors represents the complex cell
 %%%%%%%%%%%%%%%% this part is the same as the base model saveOutGaborAct_4phase_simComp_denseGabor.m
 %% load image and stimuli
+% save two types of filters - one is filter output normalized by the max possible output of a filter, another is filter output not normalized. 
+% the normalization is proposed because the filter output can be different because of the filter size. 
 filterRsps = {'divMaxFiltRsp','noDivMaxFiltRsp'};
 for fR = 1 : length(filterRsps)
     type = {};
