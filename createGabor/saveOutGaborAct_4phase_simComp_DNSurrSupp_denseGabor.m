@@ -2,7 +2,9 @@ clear all
 close all
 figureID = 1;
 warning('off','all')
-% this if for saving out base model
+% this is for saving out Gabor model with output further processed by exponentiation to simulate divisive noramlization - surorund suppression, and each filter is normalized by nearby filter output with the same orientation preference
+% Two types of cells are simulated in this file. The simple cell and the complex cell. The Gabor output represents the simple cell, and combination of the quadrature pair Gabors represents the complex cell
+%%%%%%%%%%%%%%%% this part is the same as the base model saveOutGaborAct_4phase_simComp_denseGabor.m
 %% load image and stimuli
 filterRsps = {'divMaxFiltRsp','noDivMaxFiltRsp'};
 for fR = 1 : length(filterRsps)
@@ -41,7 +43,7 @@ for fR = 1 : length(filterRsps)
             GWReshape = zeros(numFilter,iw^2,4);
             GWlab = zeros(numFilter,4);
             count = 0;
-            ctrImg = iw/2 + 0.5;
+            #ctrImg = iw/2 + 0.5;
             whoIsZero = [];
             for i = 1 : length(F0s)
                 for k = 1 : (F0s(i)*2)^2
@@ -65,7 +67,7 @@ for fR = 1 : length(filterRsps)
                 end
             end
 
-            %% max simple
+            %% calculate max possible filter output 
             BestImg = GWReshape;
             BestImg(BestImg>0) = 3;
             BestImg(BestImg<0) = -3;
@@ -82,11 +84,7 @@ for fR = 1 : length(filterRsps)
             resp_Complex_Max = (resp_Max_(:,1) + resp_Max_(:,2))/2;
             resp_Max = [resp_Complex_Max;resp1_Max;resp2_Max;resp3_Max;resp4_Max];
             resp_Max(resp_Max==0) = 1;
-            %% image preprocessing
-            stimTrn_pro = zeros(size(stimTrn,1),iw^2);
-            for i = 1 : size(stimTrn,1)
-                stimTrn_pro(i,:) = reshape(squeeze(stimTrn(i,:,:)),[],iw^2);
-            end
+
             %% Put img through filter
             % image preprocessing
             stimTrn_pro = zeros(size(stimTrn,1),iw^2);
@@ -132,6 +130,9 @@ for fR = 1 : length(filterRsps)
             c_ = c;
             h5create([saveDir,'/layer0Processed.h5'],'/featuremap',[size(c_,1),7250])
             h5write([saveDir,'/layer0Processed.h5'],'/featuremap',c_)
+
+%%%%%%%%%%%%%%% the above part is the same as the base model saveOutGaborAct_4phase_simComp_denseGabor.m
+% implementing surround suppression 
             for r = [0.05,0.1,0.15,0.25,0.5,0.75,1,1.5,2,2.5]
                 for adjSDParam = [0.05,0.075,0.1,0.5,0.75,1,1.25,1.5]
                 c1 = c(1:size(c,1)/5,:);
@@ -141,6 +142,7 @@ for fR = 1 : length(filterRsps)
                 c5 = c(size(c,1)/5*4+1:end,:);
                 c_s = (c2 + c3 + c4 + c5)/4;
                 d1 = divNormSpatial_adjSD_denseGabor(c1,GWlab,fNorm,thetas,iw,r,0,adjSDParam,c1);
+                % the normalization of simple cell responses is across phase.
                 d2 = divNormSpatial_adjSD_denseGabor(c2,GWlab,fNorm,thetas,iw,r,0,adjSDParam,c_s);
                 d3 = divNormSpatial_adjSD_denseGabor(c3,GWlab,fNorm,thetas,iw,r,0,adjSDParam,c_s);
                 d4 = divNormSpatial_adjSD_denseGabor(c4,GWlab,fNorm,thetas,iw,r,0,adjSDParam,c_s);
@@ -153,6 +155,7 @@ for fR = 1 : length(filterRsps)
                 type{count2} = [r,adjSDParam];
                 end
             end
+            % sae a copy of parameters tested
             type{count2+1} = ['r,adjSDParam'];
             save([saveDir,'/normType_DivNormSurroundSupp.mat'],'type')
         end
