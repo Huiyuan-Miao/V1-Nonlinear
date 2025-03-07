@@ -1,5 +1,7 @@
 '''
-Those the file title says alexnet, it is actually design to take care of any model with pre-saved feature map from processFeatureMap.py
+Those the file title says alexnet, it can be adapted to take care of any model with pre-saved feature map from processFeatureMap.py.
+To run other model, just modify the model feature directory and related saving folder. 
+Huiyuan Miao @ 2024
 '''
 # % pylab inline
 import os
@@ -57,6 +59,7 @@ def modelFitting(numlayer,rescale,whichModel,whichFeaturemap,sparse_reg_weight):
         model.saveOutput()
         print('Done fitting ' + whichModel + ' rescale ' + str(rescale) + ' whichFeaturemap ' + whichFeaturemap + ' layer '+ str(layerNum) )
 
+# loop through all layers
 def runmodelFitting(rescales,whichModels,whichFeaturemaps,numlayers,sparse_reg_weight):
     for rs in range(0,len(rescales)):
         rescale = rescales[rs]
@@ -80,8 +83,9 @@ sparse_reg_weight = 0.03
 if os.path.exists('../train_logs/monkey_rescale/AlexNet/lambda'+str(sparse_reg_weight)) == 0:
     os.mkdir('../train_logs/monkey_rescale/AlexNet/lambda' + str(sparse_reg_weight))
 
+# set parameters an run model
 rescales = [40];
 whichModels = ['AlexNet_modified_color']
-whichFeaturemaps = ['featureMap']
-numlayers = [17]
+whichFeaturemaps = ['featureMap'] # default setting, no need to change, 
+numlayers = [17]# how many layers/models to fit (currently it is doing model fitting to representation prior and after relu and maxpooling)
 runmodelFitting(rescales,whichModels,whichFeaturemaps,numlayers,sparse_reg_weight)
