@@ -1,7 +1,7 @@
 '''
 Those the file title says alexnet, it can be adapted to take care of any model with pre-saved feature map from processFeatureMap.py.
 To run other model, just modify the model feature directory and related saving folder. 
-Huiyuan Miao @ 2024
+Huiyuan Miao @ 2023
 '''
 # % pylab inline
 import os
