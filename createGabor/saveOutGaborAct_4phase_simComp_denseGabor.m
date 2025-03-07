@@ -1,9 +1,13 @@
 clear all
 close all
 figureID = 1;
-% this if for saving out base model
+% this is for saving out base Gabor model
+% Two types of cells are simulated in this file. The simple cell and the complex cell. The Gabor output represents the simple cell, and combination of the quadrature pair Gabors represents the complex cell
+
 %% load image and stimuli
-filterRsps = {'divMaxFiltRsp','noDivMaxFiltRsp'};
+% save two types of filters - one is filter output normalized by the max possible output of a filter, another is filter output not normalized. 
+% the normalization is proposed because the filter output can be different because of the filter size. 
+filterRsps = {'divMaxFiltRsp','noDivMaxFiltRsp'}; 
 for fR = 1 : length(filterRsps)   
     type = {};
     count2 = 1;
@@ -12,11 +16,10 @@ for fR = 1 : length(filterRsps)
     for F = 1 : length(F0ss)
         F0s = F0ss{F};
         if F == 1
-        load('preprocessedData_rescale40_bicubic_imgNormalized.mat');iw = 40; % -imgNorm
-        % Preprocessed data. basically replicating the python preprocessing
+        load('preprocessedData_rescale40_bicubic_imgNormalized.mat');iw = 40; 
+        % Preprocessed data. replicating the python preprocessing
         % steps.
         end        
-        
         %%
         for ori = [8]%[4,8,12,16]
             saveDir = ['./GaborActivation4Phase_simpleComplex_',num2str(ori),'ori_',num2str(iw),'px_denseGabor/',filterRsps{fR}];
@@ -38,11 +41,11 @@ for fR = 1 : length(filterRsps)
             freqBW = 1;
             GW = GaborWavelet_4phase_dense(iw,F0s,thetas,freqBW);
             numFilter = sum((F0s*2).^2) * length(thetas);
-            GWReshape = zeros(numFilter,iw^2,4);
-            GWlab = zeros(numFilter,4);
+            GWReshape = zeros(numFilter,iw^2,4);% flatten the filters for matrix multiplication
+            GWlab = zeros(numFilter,4); % save out the filter location, frequency, orientation 
             count = 0;
             ctrImg = iw/2 + 0.5;
-            whoIsZero = [];
+            #whoIsZero = [];
             for i = 1 : length(F0s)
                 for k = 1 : (F0s(i)*2)^2
                     ctrs = (1+(iw/F0s(i)/2)/2 :(iw/F0s(i)/2):iw)-0.5;
@@ -63,7 +66,7 @@ for fR = 1 : length(filterRsps)
                     end
                 end
             end
-            %% max simple
+            %% max filter responses calculation 
             BestImg = GWReshape;
             
             BestImg(BestImg>0) = 3;
@@ -82,11 +85,7 @@ for fR = 1 : length(filterRsps)
             resp_Complex_Max = (resp_Max_(:,1) + resp_Max_(:,2))/2;
             resp_Max = [resp_Complex_Max;resp1_Max;resp2_Max;resp3_Max;resp4_Max];
             resp_Max(resp_Max==0) = 1;
-            %% image preprocessing
-            stimTrn_pro = zeros(size(stimTrn,1),iw^2);
-            for i = 1 : size(stimTrn,1)
-                stimTrn_pro(i,:) = reshape(squeeze(stimTrn(i,:,:)),[],iw^2);
-            end
+            
             %% Put img through filter
             % image preprocessing
             stimTrn_pro = zeros(size(stimTrn,1),iw^2);
@@ -120,7 +119,8 @@ for fR = 1 : length(filterRsps)
             resp3_ = resp3;resp3_(resp3_<0) = 0;
             resp4_ = resp4;resp4_(resp4_<0) = 0;
             resps_con_Val= [complex_Val;resp1_;resp2_;resp3_;resp4_];
-            if fR == 1 
+            
+            if fR == 1 % normalize filter output by the max possible filter responses
                 resps_con = resps_con./resp_Max;
                 resps_con_Val = resps_con_Val./resp_Max;
             end
